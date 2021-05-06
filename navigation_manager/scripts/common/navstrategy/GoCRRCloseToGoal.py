@@ -136,7 +136,7 @@ class GoCRRCloseToGoal(GoCleanRetryReplayLastNavStrategy,object):
         robot_p.pose.position.x=0
         robot_p.pose.position.y = 0
         robot_p.pose.position.z = 0
-        robotPose = self._tflistener.transformPose("/map", robot_p)
+        robotPose = self._tflistener.transformPose("map", robot_p)
         return robotPose
 
          #try:
