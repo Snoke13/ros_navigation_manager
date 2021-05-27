@@ -27,6 +27,7 @@ from common.navstrategy.GoAndRetryNavStrategy import GoAndRetryNavStrategy
 from common.navstrategy.GoCleanRetryNavStrategy import GoCleanRetryNavStrategy
 from common.navstrategy.GoCleanRetryReplayLastNavStrategy import GoCleanRetryReplayLastNavStrategy
 from common.navstrategy.GoCRRCloseToGoal import GoCRRCloseToGoal
+from common.navstrategy.GoCloseToObject import GoCloseToObject
 
 
 
@@ -90,7 +91,7 @@ class Nm:
         else:
             rospy.logwarn("Couldn't connect to move base server")
 
-        self._navigationStrategyMaps={"Simple":SimplyGoNavStrategy(self._actMove_base),"Retry":GoAndRetryNavStrategy(self._actMove_base),"CleanAndRetry":GoCleanRetryNavStrategy(self._actMove_base),"CleanRetryReplay":GoCleanRetryReplayLastNavStrategy(self._actMove_base),"CRRCloseToGoal":GoCRRCloseToGoal(self._actMove_base)}
+        self._navigationStrategyMaps={"Simple":SimplyGoNavStrategy(self._actMove_base),"Retry":GoAndRetryNavStrategy(self._actMove_base),"CleanAndRetry":GoCleanRetryNavStrategy(self._actMove_base),"CleanRetryReplay":GoCleanRetryReplayLastNavStrategy(self._actMove_base),"CRRCloseToGoal":GoCRRCloseToGoal(self._actMove_base),"GoCloseToObject":GoCloseToObject(self._actMove_base)}
         self._tflistener = TransformListener()
 
         self._actionServer = actionlib.SimpleActionServer('navigation_manager', NavMngAction, self.executeActionServer, False)
