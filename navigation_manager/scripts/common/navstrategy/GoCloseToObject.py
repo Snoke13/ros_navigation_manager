@@ -154,9 +154,6 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
     def isValidPlan(self, startPoseStamped, targetPose):
         # self._makePlan get the new plan and check if ok if plan ok newGoal = Goal
         try:
-            if self.isPtIntoCostMap(targetPose.position.x, targetPose.position.y):
-                return False
-
             start = startPoseStamped
             goal = PoseStamped()
             goal.header.frame_id = 'map'
@@ -168,6 +165,8 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
             if len(current_plan.plan.poses) == 0:
                 return False
             else:
+                if self.isPtIntoCostMap(targetPose.position.x, targetPose.position.y):
+                    return False
                 return True
         except Exception as e:
             rospy.logwarn("{class_name} : Service make plan call failed: %s".format(
