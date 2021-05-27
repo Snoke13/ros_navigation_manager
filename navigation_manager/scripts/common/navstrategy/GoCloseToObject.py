@@ -76,11 +76,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
 
         goal = self.getValidGoal(targetPose)
 
-        if goal != None:
-            rospy.loginfo("{class_name} : Current plan is valid".format(
-                class_name=self.__class__.__name__))
-        else:
-            rospy.logwarn("Failed to get a valid plan")
+        if goal == None:
             self.reset()
 
         current_nb_newplan_recovery = 0
@@ -105,6 +101,8 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
                     current_nb_newplan_recovery = current_nb_newplan_recovery+1
             else:
                 # if navigation success return success
+                rospy.loginfo("{class_name} : Plan found with: r=%.2f, p=%d".format(
+                    class_name=self.__class__.__name__), self._circleRadius, self._point)
                 return True
         # navigation failed and max retry reached
         return False
@@ -126,8 +124,9 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         targetedPose.position.x = target.position.x + r*math.sin(2*3.14*point/self.POINTS_PER_CIRCLE)
         targetedPose.position.y = target.position.y + r*math.cos(2*3.14*point/self.POINTS_PER_CIRCLE)
 
+        rotationOffset = tf.transformations.quaternion_from_euler(-0.35, 0, 0)
         targetedPose.orientation = MathToolbox.computeQuaternion(
-            targetedPose.position.x, targetedPose.position.y, target.position.x, target.position.y)
+            targetedPose.position.x, targetedPose.position.y, target.position.x, target.position.y) * rotationOffset
 
         return targetedPose
 
