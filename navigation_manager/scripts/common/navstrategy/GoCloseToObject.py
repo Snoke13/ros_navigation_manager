@@ -124,7 +124,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         targetedPose = Pose()
 
         targetedPose.position.x = target.position.x + r*math.sin(2*3.14*point/self.POINTS_PER_CIRCLE)
-        targetedPose.position.y = target.position.x + r*math.cos(2*3.14*point/self.POINTS_PER_CIRCLE)
+        targetedPose.position.y = target.position.y + r*math.cos(2*3.14*point/self.POINTS_PER_CIRCLE)
 
         targetedPose.orientation = MathToolbox.computeQuaternion(
             targetedPose.position.x, targetedPose.position.y, target.position.x, target.position.y)
