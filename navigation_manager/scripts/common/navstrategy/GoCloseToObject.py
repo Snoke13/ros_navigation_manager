@@ -126,11 +126,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         targetedPose.position.y = target.position.y + r*math.cos(2*3.14*point/self.POINTS_PER_CIRCLE)
 
         quaternion = tf.transformations.quaternion_from_euler(0, 0, math.atan2(
-<<<<<<< HEAD
             float(target.position.y - targetedPose.position.y), float(target.position.x - targetedPose.position.x)) - 0.35)
-=======
-        float(target.position.y-targetedPose.position.y), float(target.position.x-targetedPose.position.x)) - 0.35)
->>>>>>> 5c4714e50c6e4f6479b3694168a44da53775e1e7
         targetedPose.orientation = quaternion
 
         return targetedPose
