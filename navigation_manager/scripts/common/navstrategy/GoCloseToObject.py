@@ -78,6 +78,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
 
         if goal == None:
             self.reset()
+            goal = targetPose
 
         current_nb_newplan_recovery = 0
         while current_nb_newplan_recovery < self.MAX_NB_RETRY_OVERALL and not rospy.is_shutdown():
@@ -124,9 +125,9 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         targetedPose.position.x = target.position.x + r*math.sin(2*3.14*point/self.POINTS_PER_CIRCLE)
         targetedPose.position.y = target.position.y + r*math.cos(2*3.14*point/self.POINTS_PER_CIRCLE)
 
-        rotationOffset = tf.transformations.quaternion_from_euler(-0.35, 0, 0)
-        targetedPose.orientation = MathToolbox.computeQuaternion(
-            targetedPose.position.x, targetedPose.position.y, target.position.x, target.position.y) * rotationOffset
+        quaternion = tf.transformations.quaternion_from_euler(0, 0, math.atan2(
+            float(target.position.y - targetedPose.position.y), float(target.position.x - targetedPose.position.x)) - 0.35)
+        targetedPose.orientation = quaternion
 
         return targetedPose
 
