@@ -59,6 +59,9 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
     def reset(self):
         super(GoCloseToObject, self).reset()
         self._nbRetryForValidMakePlan = 0
+        self.resetFocus()
+
+    def resetFocus(self):
         self._circleRadius = self.MIN_RANGE_TO_GOAL
         self._point = 0
 
@@ -77,7 +80,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         goal = self.getValidGoal(targetPose)
 
         if goal == None:
-            self.reset()
+            self.resetFocus()
             goal = targetPose
 
         current_nb_newplan_recovery = 0
@@ -127,12 +130,16 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
 
         quaternion = tf.transformations.quaternion_from_euler(0, 0, math.atan2(
             float(target.position.y - targetedPose.position.y), float(target.position.x - targetedPose.position.x)) - 0.35)
-        targetedPose.orientation = quaternion
+        targetedPose.orientation.x = quaternion[0]
+        targetedPose.orientation.y = quaternion[1]
+        targetedPose.orientation.z = quaternion[2]
+        targetedPose.orientation.w = quaternion[3]
 
         return targetedPose
 
     def getValidGoal(self, targetPose):
         while self._circleRadius < self.MAX_RANGE_TO_GOAL:
+            rospy.loginfo("Test possible position on circle r=%.2f", self._circleRadius)
             while self._point < self.POINTS_PER_CIRCLE:
                 # get current robot position
                 robotPose = self.getRobotPose()
