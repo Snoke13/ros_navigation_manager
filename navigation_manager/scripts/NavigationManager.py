@@ -122,6 +122,10 @@ class Nm:
             elif goal.action == "NT":
                 self.turnAround(float(goal.rotation_angle))
                 isActionSucceed=True
+            elif goal.action == "RES":
+                current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
+                current_navigationStrategy.resetFocus()
+                isActionSucceed=True
     
         except Exception as e:
             rospy.logwarn("unable to find or launch function corresponding to the action %s:, error:[%s]",str(goal.action), str(e))
