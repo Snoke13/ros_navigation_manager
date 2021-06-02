@@ -124,7 +124,7 @@ class Nm:
                 isActionSucceed=True
             elif goal.action == "RES":
                 current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
-                current_navigationStrategy.resetFocus()
+                current_navigationStrategy.resume()
                 isActionSucceed=True
     
         except Exception as e:

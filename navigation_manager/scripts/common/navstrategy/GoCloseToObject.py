@@ -55,21 +55,34 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         self._isReplyLastCmdActivated = False
         self._circleRadius = self.MIN_RANGE_TO_GOAL
         self._point = 0
+        self.lastSourcePose = ''
+        self.lastTargetPose = ''
+        self._circleRadius = self.MIN_RANGE_TO_GOAL
+        self._point = 0
+        self._resume = False
 
     def reset(self):
         super(GoCloseToObject, self).reset()
         self._nbRetryForValidMakePlan = 0
-        self.resetFocus()
-
-    def resetFocus(self):
         self._circleRadius = self.MIN_RANGE_TO_GOAL
         self._point = 0
+
+    def resume(self):
+        if self.lastSourcePose != '' and self.lastTargetPose != '':
+           self._resume = True
+        result = self.goto(self.lastSourcePose, self.lastTargetPose)
+        self._resume = False
+        return result
 
     def goto(self, sourcePose, targetPose):
         rospy.loginfo("-------------- GoCloseToObject  NEW NAVIGATION ORDER [%s,%s] -----------------", str(
             targetPose.position.x), str(targetPose.position.y))
         # to do make plan if no plan
         # select new goal close to initial goal and loop
+
+        #saving info for resume command
+        self.lastSourcePose = sourcePose
+        self.lastTargetPose = targetPose
 
         # reset costmap before checking plan is valid
         self.resetCostMaps()
@@ -138,8 +151,12 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         return targetedPose
 
     def getValidGoal(self, targetPose):
+        if not self._resume:
+            self._circleRadius = self.MIN_RANGE_TO_GOAL
         while self._circleRadius < self.MAX_RANGE_TO_GOAL:
             rospy.loginfo("Test possible position on circle r=%.2f", self._circleRadius)
+            if not self._resume:
+                self._point = 0
             while self._point < self.POINTS_PER_CIRCLE:
                 # get current robot position
                 robotPose = self.getRobotPose()
