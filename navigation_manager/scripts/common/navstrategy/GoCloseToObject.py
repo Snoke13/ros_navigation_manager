@@ -155,7 +155,6 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
             else:
                 self._point = 0
             while self._point < self.POINTS_PER_CIRCLE:
-                rospy.loginfo("Test possible position on point p=%d", self._point)
                 # get current robot position
                 robotPose = self.getRobotPose()
 
