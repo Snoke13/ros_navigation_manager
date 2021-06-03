@@ -57,21 +57,16 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         self._point = 0
         self.lastSourcePose = ''
         self.lastTargetPose = ''
-        self._circleRadius = self.MIN_RANGE_TO_GOAL
-        self._point = 0
         self._resume = False
 
     def reset(self):
         super(GoCloseToObject, self).reset()
         self._nbRetryForValidMakePlan = 0
-        self._circleRadius = self.MIN_RANGE_TO_GOAL
-        self._point = 0
 
     def resume(self):
         if self.lastSourcePose != '' and self.lastTargetPose != '':
            self._resume = True
         result = self.goto(self.lastSourcePose, self.lastTargetPose)
-        self._resume = False
         return result
 
     def goto(self, sourcePose, targetPose):
@@ -93,7 +88,6 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         goal = self.getValidGoal(targetPose)
 
         if goal == None:
-            self.resetFocus()
             goal = targetPose
 
         current_nb_newplan_recovery = 0
@@ -151,13 +145,17 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         return targetedPose
 
     def getValidGoal(self, targetPose):
+        isvalidPlan = False
         if not self._resume:
             self._circleRadius = self.MIN_RANGE_TO_GOAL
         while self._circleRadius < self.MAX_RANGE_TO_GOAL:
             rospy.loginfo("Test possible position on circle r=%.2f", self._circleRadius)
-            if not self._resume:
+            if self._resume:
+                self._point += 1
+            else:
                 self._point = 0
             while self._point < self.POINTS_PER_CIRCLE:
+                rospy.loginfo("Test possible position on point p=%d", self._point)
                 # get current robot position
                 robotPose = self.getRobotPose()
 
@@ -165,10 +163,10 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
                 newGoal = self.processNewGoal(
                     robotPose.pose, targetPose, self._circleRadius, self._point)
                 isvalidPlan = self.isValidPlan(robotPose, newGoal)
-                if not isvalidPlan:
-                    self._point += 1
-                else:
+                self._resume = False
+                if isvalidPlan:
                     return newGoal
+                self._point += 1
             if not isvalidPlan:
                 self._circleRadius += self.MAKE_PLAN_TOLERANCE
             else:
