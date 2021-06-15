@@ -95,6 +95,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
             result = super(GoCloseToObject, self).goto(sourcePose, goal)
             # if navigation failed
             if not result:
+                self._resume = True
 
                 # reset costmap before checking plan is valid
                 self.resetCostMaps()
