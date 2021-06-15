@@ -21,6 +21,8 @@ from GoCleanRetryReplayLastNavStrategy import GoCleanRetryReplayLastNavStrategy
 
 
 class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
+    _maxCostMapTolerance = 35
+    
     MAKE_PLAN_TOLERANCE = 0.02  # in meter
     MAX_NB_RETRY = 2
     MAX_TIME_ELAPSED_PER_GOAL = 45
@@ -65,7 +67,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
 
     def resume(self):
         if self.lastSourcePose != '' and self.lastTargetPose != '':
-           self._resume = True
+            self._resume = True
         result = self.goto(self.lastSourcePose, self.lastTargetPose)
         return result
 
@@ -75,7 +77,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         # to do make plan if no plan
         # select new goal close to initial goal and loop
 
-        #saving info for resume command
+        # saving info for resume command
         self.lastSourcePose = sourcePose
         self.lastTargetPose = targetPose
 
@@ -172,6 +174,20 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
             else:
                 return newGoal
         return None
+
+    def isPtIntoCostMap(self, x, y):
+        rospy.loginfo("{class_name} : Is point into cost map ?".format(class_name=self.__class__.__name__))
+        global_cost_value = self.getCostMapValue(x, y, self._globalCostMap)
+        rospy.loginfo("{class_name} : global cost value isPtIntoCostMap : %s".format(
+            class_name=self.__class__.__name__), str(global_cost_value))
+
+        # FIME need to adjust coord for local costmap
+        # local_cost_value=self.getCostMapValue(x,y,self._localCostMap)
+        local_cost_value = 0
+        if global_cost_value >= self._maxCostMapTolerance or local_cost_value >= self._maxCostMapTolerance:
+            return True
+        else:
+            return False
 
     def isValidPlan(self, startPoseStamped, targetPose):
         # self._makePlan get the new plan and check if ok if plan ok newGoal = Goal
