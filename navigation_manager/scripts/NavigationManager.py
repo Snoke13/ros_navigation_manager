@@ -122,6 +122,9 @@ class Nm:
             elif goal.action == "NT":
                 self.turnAround(float(goal.rotation_angle))
                 isActionSucceed=True
+            elif goal.action == "RN":
+                current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
+                current_navigationStrategy.goto(None, None, radius=goal.rotation_angle)
             elif goal.action == "RES":
                 current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
                 current_navigationStrategy.resume()

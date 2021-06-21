@@ -59,6 +59,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         self._point = 0
         self.lastSourcePose = ''
         self.lastTargetPose = ''
+        self.lastRadius = ''
         self._resume = False
 
     def reset(self):
@@ -68,10 +69,13 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
     def resume(self):
         if self.lastSourcePose != '' and self.lastTargetPose != '':
             self._resume = True
-        result = self.goto(self.lastSourcePose, self.lastTargetPose)
+        if self.lastRadius:
+            result = self.goto(self.lastSourcePose, self.lastTargetPose, self.lastRadius)
+        else:
+            result = self.goto(self.lastSourcePose, self.lastTargetPose)
         return result
 
-    def goto(self, sourcePose, targetPose):
+    def goto(self, sourcePose, targetPose, radius=None):
         rospy.loginfo("-------------- GoCloseToObject  NEW NAVIGATION ORDER [%s,%s] -----------------", str(
             targetPose.position.x), str(targetPose.position.y))
         # to do make plan if no plan
@@ -80,6 +84,7 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         # saving info for resume command
         self.lastSourcePose = sourcePose
         self.lastTargetPose = targetPose
+        self.lastRadius = radius
 
         # reset costmap before checking plan is valid
         self.resetCostMaps()
@@ -87,7 +92,10 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
         # sleep to wait cost map agin (global) CAUTION global cost map frequency need to be >1hz
         rospy.sleep(self.SLEEP_AFTER_CLEAR_COSTMAP)
 
-        goal = self.getValidGoal(targetPose)
+        if radius:
+            goal = self.getValidGoalWithRadius(targetPose, radius)
+        else:
+            goal = self.getValidGoal(targetPose)
 
         if goal == None:
             goal = targetPose
@@ -106,7 +114,10 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
                 rospy.sleep(self.SLEEP_AFTER_CLEAR_COSTMAP)
 
                 # try next point x times
-                goal = self.getValidGoal(targetPose)
+                if radius:
+                    goal = self.getValidGoalWithRadius(targetPose, radius)
+                else:
+                    goal = self.getValidGoal(targetPose)
                 # if no valid plan abord
                 if goal == None:
                     return False
@@ -173,6 +184,32 @@ class GoCloseToObject(GoCleanRetryReplayLastNavStrategy, object):
                 self._circleRadius += self.MAKE_PLAN_TOLERANCE
             else:
                 return newGoal
+        return None
+
+    def getValidGoalWithRadius(self, targetPose, radius):
+        isvalidPlan = False
+        if self._resume:
+            self._circleRadius = self.lastRadius
+        else:
+            self._circleRadius = radius
+
+        if self._resume:
+            self._point += 1
+        else:
+            self._point = 0
+
+        while self._point < self.POINTS_PER_CIRCLE:
+            # get current robot position
+            robotPose = self.getRobotPose()
+
+            # process new goal according tolerance
+            newGoal = self.processNewGoal(
+                robotPose.pose, targetPose, self._circleRadius, self._point)
+            isvalidPlan = self.isValidPlan(robotPose, newGoal)
+            self._resume = False
+            if isvalidPlan:
+                return newGoal
+            self._point += 1
         return None
 
     def isPtIntoCostMap(self, x, y):
