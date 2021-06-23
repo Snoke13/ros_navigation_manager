@@ -1,4 +1,6 @@
 <launch>
+  <!-- fix costmap not received on all import -->
+  <node pkg="navigation_manager" type="costmap_relay.py" name="costmap_relay"></node>
 
   <!-- Navigation Manager in charge of managing pepper navigation according navigation strategy -->
   <node pkg="navigation_manager" type="NavigationManager.py" name="navigation_manager" required="false" output="screen"></node>

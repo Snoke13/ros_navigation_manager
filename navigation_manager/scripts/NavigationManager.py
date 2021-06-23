@@ -112,7 +112,6 @@ class Nm:
     def executeActionServer(self, goal):
         isActionSucceed=False
         try:
-
             # call the process associating to the action
             #isActionSucceed=self._actionToServiceMap[data.action](data)
             ### FIXME need to rework all _actionToServiceMap call...
@@ -124,7 +123,14 @@ class Nm:
                 isActionSucceed=True
             elif goal.action == "RN":
                 current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
-                current_navigationStrategy.goto(None, None, radius=goal.rotation_angle)
+                pt=Pose()
+                pt.position.x=goal.itP_point.x
+                pt.position.y=goal.itP_point.y
+                pt.orientation.x=0
+                pt.orientation.y=0
+                pt.orientation.z=0
+                pt.orientation.w=1
+                current_navigationStrategy.goto(None, pt, radius=0.49)
             elif goal.action == "RES":
                 current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
                 current_navigationStrategy.resume()
