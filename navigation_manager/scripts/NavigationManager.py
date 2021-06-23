@@ -180,6 +180,36 @@ class Nm:
         self._gm_bus_pub.publish(gm_result)
         return result
 
+    def navigateOnRadius(self,current_message_id,current_itP,current_message_action,navigationStrategy,x,y,r):
+        if current_itP == '':
+            pt=Pose()
+            pt.position.x=x
+            pt.position.y=y
+            pt.orientation.x=0
+            pt.orientation.y=0
+            pt.orientation.z=0
+            pt.orientation.w=1
+            # Step 2: Use a navigation strategy
+            result= navigationStrategy.goto(None,pt,radius=r)
+        else:
+            # Step 1: get pose of sent interest point label
+            itPoint = self._getPoint_service(current_itP)
+            # Step 2: Use a navigation strategy
+            result= navigationStrategy.goto(None,itPoint.itP.pose,radius=r)
+        
+        # Step 3: Send result to the general Manager
+        resultId=4 #Failure
+        if result:
+            resultId=3 #Success
+
+        gm_result = gm_bus_msg()
+        gm_result.action = current_message_action
+        gm_result.action_id = current_message_id
+        gm_result.payload = ""
+        gm_result.result = resultId
+        self._gm_bus_pub.publish(gm_result)
+        return result
+
 
     #
     # navigate by following a person
