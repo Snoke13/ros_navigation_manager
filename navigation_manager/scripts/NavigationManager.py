@@ -130,7 +130,7 @@ class Nm:
                 pt.orientation.y=0
                 pt.orientation.z=0
                 pt.orientation.w=1
-                current_navigationStrategy.goto(None, pt, radius=0.49)
+                current_navigationStrategy.goto(None, pt, radius=0.53)
             elif goal.action == "RES":
                 current_navigationStrategy=self._navigationStrategyMaps[goal.navstrategy]
                 current_navigationStrategy.resume()
